@@ -1,14 +1,29 @@
 import { DB } from "@/app/libs/DB";
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
+import jwt from "jsonwebtoken";
 
 export const GET = async (request) => {
-  // return NextResponse.json(
-  //   {
-  //     ok: false,
-  //     message: "Invalid token",
-  //   },
-  //   { status: 401 }
-  // );
+  const rawAuthHeader = headers().get("authorization");
+  //Bearer wariksadfiafksjlrjelkd
+  const token = rawAuthHeader.split(" ")[1];
+  //split -> array of string ['Bearer' , 'wariksadfiafksjlrjelkd']
+
+  let studentId = null;
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    studentId = payload.studentId;
+    console.log(payload);
+  } catch {
+    return NextResponse.json(
+      {
+        ok: false,
+        message: "Invalid token",
+      },
+      { status: 401 }
+    );
+  }
 
   const courseNoList = [];
   for (const enroll of DB.enrollments) {
